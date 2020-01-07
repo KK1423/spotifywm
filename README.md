@@ -7,17 +7,11 @@ Inspired by [steamwm](https://github.com/dscharrer/steamwm).
 
 # Installation
 
-```
-$ make
-```
+This script installs the debian spotify package, and then replaces the default symlink that launches spotify with a bash script that launches spotify with the proper WM_CLASS.
 
-# Usage
+Also modifies the dpkg listing for spotify-client so that the uninstall option appears in the crostini launcher.
 
 ```
-LD_PRELOAD=/usr/lib/libcurl.so.3:/path/to/spotifywm.so /path/to/spotify/binary
-```
-Note that libcurl needs to be preloaded for Arch Linux.
-I don't know about other distributions.
 
-Under Arch Linux, do not run the wrapper script in /usr/bin, it will override `LD_PRELOAD`.
-Use `/usr/share/spotify/spotify` instead.
+$ ./spotifywm
+```

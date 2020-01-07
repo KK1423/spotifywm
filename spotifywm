@@ -1,30 +1,10 @@
 #!/bin/bash
 
-#if 0
 curl -sS https://download.spotify.com/debian/pubkey.gpg | sudo apt-key add -
 echo "deb http://repository.spotify.com stable non-free" | sudo tee /etc/apt/sources.list.d/spotify.list
 sudo apt-get update && sudo apt-get -y install spotify-client
 
-tail -n +2 "$0" | g++ -x c++ -Wall -Wextra -O3 -shared -fPIC -static-libgcc -lX11 -DSONAME="spotifywm.so" -o spotifywm.so -
-strip spotifywm.so
-SPOTIFY=`which spotify`
-SPOTIFYBIN=`readlink -f $SPOTIFY`
-echo "#!/bin/bash
-LD_PRELOAD=spotifywm.so $SPOTIFYBIN" > spotify
-sudo chmod --reference $SPOTIFY spotifywm.so
-sudo chmod --reference $SPOTIFY spotify
-sudo chmod +x spotify
-sudo rm $SPOTIFY
-sudo cp -f spotify $SPOTIFY
-sudo cp -f spotifywm.so /usr/lib
-rm spotify spotifywm.so
-
-md5sum /usr/share/applications/spotify.desktop | sudo tee -a /var/lib/dpkg/info/spotify-client.md5sums
-echo "/usr/share/applications/spotify.desktop" | sudo tee -a /var/lib/dpkg/info/spotify-client.list
-exit
-#endif
-
-
+echo << \EOF | g++ -x c++ -Wall -Wextra -O3 -shared -fPIC -static-libgcc -lX11 -DSONAME="spotifywm.so" -o spotifywm.so -
 #ifndef _GNU_SOURCE
 #define _GNU_SOURCE
 #endif /* _GNU_SOURCE */
@@ -87,3 +67,21 @@ INTERCEPT(int, XMapWindow,
 	}
 	return BASE(XMapWindow)(dpy, w);
 }
+EOF
+
+strip spotifywm.so
+SPOTIFY=`which spotify`
+SPOTIFYBIN=`readlink -f $SPOTIFY`
+echo "#!/bin/bash
+LD_PRELOAD=spotifywm.so $SPOTIFYBIN" > spotify
+sudo chmod --reference $SPOTIFY spotifywm.so
+sudo chmod --reference $SPOTIFY spotify
+sudo chmod +x spotify
+sudo rm $SPOTIFY
+sudo cp -f spotify $SPOTIFY
+sudo cp -f spotifywm.so /usr/lib
+rm spotify spotifywm.so
+
+md5sum /usr/share/applications/spotify.desktop | sudo tee -a /var/lib/dpkg/info/spotify-client.md5sums
+echo "/usr/share/applications/spotify.desktop" | sudo tee -a /var/lib/dpkg/info/spotify-client.list
+
